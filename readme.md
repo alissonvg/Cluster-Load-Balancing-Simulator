@@ -3,64 +3,49 @@
 [![GitHub stars](https://img.shields.io/github/stars/alissonvg/cluster-load-balancing-simulator?style=social)](https://github.com/alissonvg/cluster-load-balancing-simulator/stargazers)
 [![GitHub license](https://img.shields.io/github/license/alissonvg/cluster-load-balancing-simulator)](https://github.com/alissonvg/cluster-load-balancing-simulator/blob/main/LICENSE)
 
-A simple and interactive simulation of load balancing in heterogeneous server clusters, made in JavaScript with Canvas. Gives a basic comparison of algorithms like **Least Remaining Time** (LRT) and **Shortest Queue** (SQ), with metrics calculated in real time, such as average wait time, throughput, and CPU usage.
+A simple and interactive simulation of load balancing in heterogeneous server clusters, built with JavaScript and Canvas. Gives a basic comparison of different algorithms like **Least Remaining Time** (LRT) and **Shortest Queue** (SQ ), with metrics calculated in real time, such as average wait time, throughput, and CPU usage.
 
-This is a tool for visually understanding scheduling concepts in distributed systems and cloud computing, developed as a personal project.
+This tool was made for visually understanding scheduling and balancing in distributed systems, built as a personal project.
 
 [Online Demo](https://alissonvg.github.io/cluster-load-balancing-simulator/) (hosted via GitHub Pages)
 
-![Demo Image](demo-screenshot.png) <!-- Add a GIF or screenshot here -->
+![Demo Image](demo-screenshot.png) 
 
 ## Features
-- **Real-Time Visualization**: See tasks arriving, queuing, and processing on servers with different speeds (small, medium, large, xlarge).
-- **Comparable Algorithms**: Toggle between LRT (based on expected delay) and SQ (shortest queue, with tie-break by speed).
+- **Real-Time Visualization**: See tasks arriving, queuing, and processing on servers with different speeds.
+- **Comparable Algorithms**: Compare between LRT (based on expected delay) and SQ (shortest queue, with tie-break by speed).
 - **Modes**:
-  - **Sandbox**: Testing with sliders for arrival interval, processing time and algorithm which can be toggled in real time.
-  - **Benchmark**: Fixed parameters, choose number of tasks (50/100/200); runs to completion and generates CSV (TaskID, WaitTime, Server, etc.).
+  - **Sandbox**: Test with sliders for arrival interval, processing time and algorithm which can be altered in real time.
+  - **Benchmark**: Fixed parameters, choose the number of tasks (The options are 50, 100 and 200); runs until completion and generates .csv file (TaskID, WaitTime, Server, etc.).
 - **Metrics**: Avg Wait Time (s), Throughput (tasks/min), Avg CPU (%), Cluster Load (%).
 - **Logs and Export**: Automatic CSV export in benchmark for analysis (e.g., in Excel or Python).
 
 ## How to Run
 ### Locally
-1. Clone the repository: `git clone https://github.com/alissonvg/cluster-load-balancing-simulator.git`
-2. Open `index.html` in a browser (Tested in Chrome andFirefox).
-3. Choose mode: Sandbox for free tests or Benchmark for controlled experiments.
+1. Clone the repository.
+2. Open `index.html` in a browser (Tested in Chrome and Firefox).
+3. Choose one of the modes: Sandbox for free tests or Benchmark for tests with fixed parameters.
 
 ### Online
-- Access the [demo](https://alissonvg.github.io/cluster-load-balancing-simulator/) directly.
+- Access the [demo](https://alissonvg.github.io/cluster-load-balancing-simulator/).
 
-No server or installation required everything runs in the browser.
-
-## Usage
-### Sandbox Mode
-- Adjust sliders for arrival interval (frames) and base processing time.
-- Toggle algorithm to compare impacts on metrics.
-- Reset to restart the simulation.
-
-### Benchmark Mode
-- Set fixed parameters (sliders and algorithm).
-- Choose number of tasks (50/100/200).
-- Run: Simulation stops after all tasks complete and downloads a CSV automatically.
+No installation required, everything runs in your browser.
 
 ## Algorithms Included (so far)
-- **Least Remaining Time (LRT)**: Chooses server with lowest expected delay (remaining time + queue * avg process time). A basic optimization for heterogeneous clusters.
-- **Shortest Queue (SQ)**: Chooses shortest queue (tie-break by faster server). Simple but less efficient with varying speeds.
-
-Key Equations:
-- Expected Delay = Remaining Time + Queue Length × Avg Process Time
-- Throughput = Completed Tasks / (Simulated Time / 60)
+- **Least Remaining Time (LRT)**: Chooses server with lowest expected delay. A basic optimization for heterogeneous clusters.
+- **Shortest Queue (SQ)**: Chooses shortest queue, if there's a tie it will choose the fastest server. Simple but less efficient with varying speeds.
 
 ## Technologies
-- JavaScript (ES6+)
+- JavaScript
 - HTML5 Canvas for visualization and animations
-- CSS3 for UI (responsive dark theme)
+- CSS3 for UI
 - No external dependencies (except Font Awesome for icons)
 
-## Contributions
-- Fork the repo and send a Pull Request with improvements (e.g., new algorithms like Round Robin, server failure support).
+## Contributions are welcome!
+- Fork the repo and send a Pull Request with improvements (new algorithms like Round Robin, server scale-out).
 - Issues welcome for bugs or suggestions.
 
 ## License
-MIT License - see [LICENSE](LICENSE) for details.
+[MIT License](LICENSE).
 
-Developed by [Alisson Gauer](https://github.com/alissonvg) in 2026. Inspired by real-world cloud infrastructure experiences at Dell Technologies.
+Developed by [Alisson Gauer](https://github.com/alissonvg). Inspired by real-world cloud infrastructure experiences and learnings at Dell Technologies.
