@@ -1,13 +1,13 @@
 # Cluster Load Balancing Simulator
 
-[![GitHub stars](https://img.shields.io/github/stars/alissonvg/cluster-load-balancing-simulator?style=social)](https://github.com/alissonvg/cluster-load-balancing-simulator/stargazers)
-[![GitHub license](https://img.shields.io/github/license/alissonvg/cluster-load-balancing-simulator)](https://github.com/alissonvg/cluster-load-balancing-simulator/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/alissonvg/Cluster-Load-Balancing-Simulator?style=social)](https://github.com/alissonvg/Cluster-Load-Balancing-Simulator/stargazers)
+[![GitHub license](https://img.shields.io/github/license/alissonvg/Cluster-Load-Balancing-Simulator)](https://github.com/alissonvg/Cluster-Load-Balancing-Simulator/main/LICENSE)
 
 A simple and interactive simulation of load balancing in heterogeneous server clusters, built with JavaScript and Canvas. Gives a basic comparison of different algorithms like **Least Remaining Time** (LRT) and **Shortest Queue** (SQ ), with metrics calculated in real time, such as average wait time, throughput, and CPU usage.
 
 This tool was made for visually understanding scheduling and balancing in distributed systems, built as a personal project.
 
-[Online Demo](https://alissonvg.github.io/cluster-load-balancing-simulator/) (hosted via GitHub Pages)
+[Online Demo](https://alissonvg.github.io/Cluster-Load-Balancing-Simulator/) (hosted via GitHub Pages)
 
 ![Demo Image](demo-screenshot.png) 
 
@@ -27,7 +27,7 @@ This tool was made for visually understanding scheduling and balancing in distri
 3. Choose one of the modes: Sandbox for free tests or Benchmark for tests with fixed parameters.
 
 ### Online
-- Access the [demo](https://alissonvg.github.io/cluster-load-balancing-simulator/).
+- Access the [demo](https://alissonvg.github.io/Cluster-Load-Balancing-Simulator/).
 
 No installation required, everything runs in your browser.
 
@@ -46,6 +46,6 @@ No installation required, everything runs in your browser.
 - Issues welcome for bugs or suggestions.
 
 ## License
-[MIT License](LICENSE).
+[MIT License](LICENSE.md).
 
 Developed by [Alisson Gauer](https://github.com/alissonvg). Inspired by real-world cloud infrastructure experiences and learnings at Dell Technologies.
