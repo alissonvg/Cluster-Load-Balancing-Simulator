@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cluster Load Balancing Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- MODE SELECTION OVERLAY -->
+    <div id="modeOverlay" class="menu-overlay">
+        <div class="menu-box">
+            <h1><i class="fas fa-server"></i> Cluster Load Balancing Simulator</h1>
+            <p style="margin: 20px 0 30px; font-size: 15px;">Choose the mode</p>
+            
+            <button id="sandboxBtn" class="mode-btn">
+                <i class="fas fa-flask"></i><br>
+                <strong>Sandbox Mode</strong><br>
+                <small>Free testing – real-time sliders</small>
+            </button>
+            
+            <button id="benchmarkBtn" class="mode-btn">
+                <i class="fas fa-chart-bar"></i><br>
+                <strong>Benchmark Mode</strong><br>
+                <small>Fixed config – automatic CSV</small>
+            </button>
+        </div>
+    </div>
+
+    <!-- BENCHMARK CONFIG MODAL -->
+    <div id="benchmarkConfig" class="menu-overlay" style="display:none;">
+        <div class="menu-box">
+            <h1><i class="fas fa-cogs"></i> Benchmark Configuration</h1>
+            <p style="margin: 15px 0; font-size: 15px;">Set fixed parameters</p>
+
+            <label>Number of tasks</label>
+            <select id="numTasksSelect" style="width:100%; padding:10px; margin:8px 0 16px;">
+                <option value="50">50 tasks</option>
+                <option value="100" selected>100 tasks</option>
+                <option value="200">200 tasks</option>
+            </select>
+
+            <label>Algorithm</label>
+            <select id="benchmarkAlgoSelect" style="width:100%; padding:10px; margin:8px 0 16px;">
+                <option value="true">Least Remaining Time (LRT)</option>
+                <option value="false">Shortest Queue (SQ)</option>
+            </select>
+
+            <button id="startBenchmarkBtn" style="margin-top:20px; background:#3fb950; width:100%; padding:12px; font-size:16px; border:none; border-radius:6px; cursor:pointer;">
+                <i class="fas fa-play"></i> Start Benchmark
+            </button>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1><i class="fas fa-cloud"></i> Cluster Load Balancing Simulator</h1>
+        <span id="algoIndicator">Algorithm: <strong id="currentAlgo">Least Remaining Time</strong></span>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="card">
+            <h3><i class="fas fa-tachometer-alt"></i> Simulation Overview</h3>
+            <div class="metric">
+                <span class="label"><i class="fas fa-clock"></i> Pending Tasks</span>
+                <span id="pendingJobs" class="value">0</span>
+            </div>
+            <div class="metric">
+                <span class="label"><i class="fas fa-check-circle"></i> Completed Tasks</span>
+                <span id="completedCount" class="value">0</span>
+            </div>
+            <div class="metric">
+                <span class="label"><i class="fas fa-hourglass-half"></i> Avg Wait Time</span>
+                <span id="avgWait" class="value">0.00 s</span>
+            </div>
+            <div class="metric">
+                <span class="label"><i class="fas fa-microchip"></i> Avg CPU</span>
+                <span id="cpuAvg" class="value">0%</span>
+            </div>
+            <div class="load-bar">
+                <span class="label">Cluster Load</span>
+                <div id="clusterLoad" class="meter">
+                    <div class="meter-fill"></div>
+                    <span id="loadPercent" class="percent">0%</span>
+                </div>
+            </div>
+            <div class="metric">
+                <span class="label"><i class="fas fa-tachometer-alt"></i> Throughput</span>
+                <span id="throughput" class="value">0.0 tasks/min</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-cogs"></i> Simulation Parameters</h3>
+            <label><i class="fas fa-stopwatch"></i> Arrival Interval (frames)</label>
+            <input id="spawnRange" type="range" min="20" max="300" value="120">
+            <span class="range-value" id="spawnValue">120</span>
+
+            <label><i class="fas fa-tasks"></i> Base Processing Time (frames)</label>
+            <input id="procRange" type="range" min="30" max="400" value="180">
+            <span class="range-value" id="procValue">180</span>
+
+            <button id="toggleGrid"><i class="fas fa-th"></i> Toggle Grid</button>
+            <button id="pauseBtn"><i class="fas fa-pause"></i> Pause / Resume</button>
+            <button id="resetBtn"><i class="fas fa-redo"></i> Reset Simulation</button>
+            <button id="exportBtn"><i class="fas fa-download"></i> Export Results</button>
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-chart-bar"></i> Benchmark Results</h3>
+            <div id="benchmarkResults" style="font-size:13px; color:#8b949e; min-height:100px;"></div>
+        </div>
+
+        <div class="card log-card">
+            <h3><i class="fas fa-terminal"></i> Simulation Log (last 15)</h3>
+            <div id="logBody" class="log-box"></div>
+        </div>
+    </div>
+
+    <!-- CANVAS -->
+    <div class="canvas-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <script src="simulator.js"></script>
+</body>
+</html>
