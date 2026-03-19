@@ -318,7 +318,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    SERVERS.forEach(s => s.x = canvas.width * 0.75);
+    // Dynamic server positioning based on current sidebar width
+    const sidebarW = document.querySelector('.sidebar').offsetWidth || 280;
+    SERVERS.forEach(s => s.x = canvas.width - (sidebarW + 40)); // keeps servers nicely aligned on any screen size
   }
 
   window.addEventListener("resize", fitCanvas);
