@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Dynamic server positioning based on current sidebar width
     const sidebarW = document.querySelector('.sidebar').offsetWidth || 280;
     document.documentElement.style.setProperty('--sidebar-width', sidebarW + 'px');
-    SERVERS.forEach(s => s.x = canvas.width - (sidebarW + 40)); // keeps servers nicely aligned on any screen size
+    SERVERS.forEach(s => s.x = container.clientWidth - (sidebarW + 40)); // keeps servers nicely aligned on any screen size
   }
 
   window.addEventListener("resize", fitCanvas);
@@ -431,12 +431,14 @@ document.addEventListener("DOMContentLoaded", () => {
     currentMode = "sandbox";
     modeOverlay.style.display = "none";
     isRunning = true;
+    fitCanvas(); // Force redraw after overlay hide
     log("Sandbox Mode started – adjust arrival/processing in sliders", "#58a6ff");
   };
 
   document.getElementById("benchmarkBtn").onclick = () => {
     modeOverlay.style.display = "none";
     benchmarkConfig.style.display = "flex";
+    fitCanvas(); // Force redraw
   };
 
   document.getElementById("startBenchmarkBtn").onclick = () => {
@@ -458,6 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
     benchmarkTaskData = [];
 
     isRunning = true;
+    fitCanvas(); // Force redraw
     log(`Benchmark started: ${benchmarkTargetTasks} tasks (${smartAlgorithm ? "LRT" : "SQ"})`, "#f9826c");
   };
 

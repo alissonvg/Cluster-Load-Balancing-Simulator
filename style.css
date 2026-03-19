@@ -18,7 +18,7 @@ body {
 .header {
     position: absolute;
     top: 0;
-    left: 280px;
+    left: var(--sidebar-width, 280px) !important;
     right: 0;
     height: 56px;
     background: rgba(13,17,23,0.95);
@@ -46,7 +46,7 @@ body {
 }
 
 .sidebar {
-    width: 300px;
+    width: var(--sidebar-width, 300px);
     background: #161b22;
     padding: 20px;
     height: 100vh;
@@ -223,4 +223,81 @@ canvas {
 
 @media (max-width: 900px) {
     .sidebar { width: 240px; }
+}
+
+/* Add these variables at the top for easy tweaking */
+:root {
+    --sidebar-width: 300px;
+    --header-height: 56px;
+}
+
+/* Update existing sidebar and header rules */
+.sidebar {
+    width: var(--sidebar-width);
+    /* ... existing styles ... */
+}
+
+.header {
+    left: var(--sidebar-width);
+    /* ... existing styles ... */
+}
+
+/* New responsive rules */
+@media (max-width: 768px) {
+    :root {
+        --sidebar-width: 250px; /* Narrower sidebar */
+    }
+    .sidebar {
+        position: fixed; /* Make it overlay instead of pushing content */
+        left: -250px; /* Hide by default */
+        transition: left 0.3s ease;
+        z-index: 100;
+    }
+    .sidebar.open {
+        left: 0; /* Show when toggled */
+    }
+    .header {
+        left: 0; /* Full-width header */
+        padding-left: 60px; /* Space for toggle button */
+    }
+    .canvas-container {
+        margin-left: 0; /* No sidebar offset */
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --sidebar-width: 100vw; /* Full-width overlay */
+    }
+    .sidebar {
+        width: 100vw;
+        left: -100vw;
+    }
+    .header h1 {
+        font-size: 16px; /* Smaller title */
+    }
+    .menu-box {
+        width: 90vw; /* Scale modals */
+        padding: 20px;
+    }
+    .card {
+        padding: 12px; /* Tighter spacing */
+    }
+}
+
+/* Add a toggle button (hamburger) in header for small screens */
+.toggle-sidebar {
+    display: none;
+    background: none;
+    border: none;
+    color: #c9d1d9;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+    .toggle-sidebar {
+        display: block;
+    }
 }
