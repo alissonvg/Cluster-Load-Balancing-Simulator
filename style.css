@@ -212,13 +212,15 @@ canvas {
     line-height: 1.4;
 }
 
-/* ==================== RESPONSIVE ADJUSTMENTS ==================== */
+/* ==================== RESPONSIVE FIX ==================== */
+.header {
+    left: var(--sidebar-width, 280px) !important;
+}
+
 @media (max-width: 1100px) {
     .sidebar { width: 260px; }
-    .header { left: 260px; }
 }
 
 @media (max-width: 900px) {
     .sidebar { width: 240px; }
-    .header { left: 240px; }
 }

@@ -320,6 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Dynamic server positioning based on current sidebar width
     const sidebarW = document.querySelector('.sidebar').offsetWidth || 280;
+    document.documentElement.style.setProperty('--sidebar-width', sidebarW + 'px');
     SERVERS.forEach(s => s.x = canvas.width - (sidebarW + 40)); // keeps servers nicely aligned on any screen size
   }
 
