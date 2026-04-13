@@ -48,6 +48,14 @@
                 <option value="false">Shortest Queue (SQ)</option>
             </select>
 
+            <label>Arrival Interval (frames)</label>
+            <input id="benchSpawnRange" type="range" min="20" max="300" value="120">
+            <span class="range-value" id="benchSpawnValue">120</span>
+
+            <label>Base Processing Time (frames)</label>
+            <input id="benchProcRange" type="range" min="30" max="400" value="180">
+            <span class="range-value" id="benchProcValue">180</span>
+
             <button id="startBenchmarkBtn" style="margin-top:20px; background:#3fb950; width:100%; padding:12px; font-size:16px; border:none; border-radius:6px; cursor:pointer;">
                 <i class="fas fa-play"></i> Start Benchmark
             </button>
@@ -102,6 +110,12 @@
             <label><i class="fas fa-tasks"></i> Base Processing Time (frames)</label>
             <input id="procRange" type="range" min="30" max="400" value="180">
             <span class="range-value" id="procValue">180</span>
+
+            <label><i class="fas fa-code-branch"></i> Algorithm</label>
+            <select id="algoSelect" style="width:100%; padding:10px; margin:8px 0 16px;">
+                <option value="true">Least Remaining Time (LRT)</option>
+                <option value="false">Shortest Queue (SQ)</option>
+            </select>
 
             <button id="toggleGrid"><i class="fas fa-th"></i> Toggle Grid</button>
             <button id="pauseBtn"><i class="fas fa-pause"></i> Pause / Resume</button>

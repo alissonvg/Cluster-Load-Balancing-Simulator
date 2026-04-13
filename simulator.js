@@ -25,6 +25,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const procRange = document.getElementById("procRange");
   const spawnValue = document.getElementById("spawnValue");
   const procValue = document.getElementById("procValue");
+  // Sidebar algorithm selector (sandbox-only)
+  const algoSelect = document.getElementById("algoSelect");
+  // Benchmark-specific parameter controls (modal)
+  const benchSpawnRange = document.getElementById("benchSpawnRange");
+  const benchProcRange = document.getElementById("benchProcRange");
+  const benchSpawnValue = document.getElementById("benchSpawnValue");
+  const benchProcValue = document.getElementById("benchProcValue");
 
   // Action buttons
   const pauseBtn = document.getElementById("pauseBtn");
@@ -102,8 +109,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Update algorithm display in UI
   function updateAlgoDisplay() {
     const name = smartAlgorithm ? "Least Remaining Time" : "Shortest Queue";
-    algoNameEl.textContent = name;
-    currentAlgoEl.textContent = name;
+    if (algoNameEl) algoNameEl.textContent = name;
+    if (currentAlgoEl) currentAlgoEl.textContent = name;
   }
 
   // Update all metrics in sidebar
@@ -411,6 +418,12 @@ document.addEventListener("DOMContentLoaded", () => {
     benchmarkResultsEl.innerHTML = "";
     updateMetrics();
     log("Simulation reset");
+    // Re-enable sidebar sliders in case they were locked by benchmark
+    spawnRange.disabled = procRange.disabled = false;
+    if (algoSelect) {
+      algoSelect.disabled = false;
+      algoSelect.value = smartAlgorithm ? "true" : "false";
+    }
   };
 
   exportBtn.onclick = () => {
@@ -431,11 +444,26 @@ document.addEventListener("DOMContentLoaded", () => {
     currentMode = "sandbox";
     modeOverlay.style.display = "none";
     isRunning = true;
+    if (algoSelect) {
+      algoSelect.disabled = false;
+      algoSelect.value = smartAlgorithm ? "true" : "false";
+      updateAlgoDisplay();
+    }
     fitCanvas(); // Force redraw after overlay hide
     log("Sandbox Mode started – adjust arrival/processing in sliders", "#58a6ff");
   };
 
   document.getElementById("benchmarkBtn").onclick = () => {
+    // Populate benchmark modal from current live parameters
+    if (benchSpawnRange) {
+      benchSpawnRange.value = SPAWN_INTERVAL;
+      benchSpawnValue.textContent = SPAWN_INTERVAL;
+    }
+    if (benchProcRange) {
+      benchProcRange.value = BASE_PROC_TIME;
+      benchProcValue.textContent = BASE_PROC_TIME;
+    }
+
     modeOverlay.style.display = "none";
     benchmarkConfig.style.display = "flex";
     fitCanvas(); // Force redraw
@@ -447,8 +475,20 @@ document.addEventListener("DOMContentLoaded", () => {
     benchmarkTargetTasks = parseInt(document.getElementById("numTasksSelect").value);
     smartAlgorithm = document.getElementById("benchmarkAlgoSelect").value === "true";
 
-    // Lock controls for fixed params
+    // Apply chosen benchmark parameters (arrival / processing) and lock controls
+    if (benchSpawnRange) {
+      SPAWN_INTERVAL = parseInt(benchSpawnRange.value);
+      spawnValue.textContent = SPAWN_INTERVAL;
+    }
+    if (benchProcRange) {
+      BASE_PROC_TIME = parseInt(benchProcRange.value);
+      procValue.textContent = BASE_PROC_TIME;
+    }
     spawnRange.disabled = procRange.disabled = true;
+    if (algoSelect) {
+      algoSelect.disabled = true;
+      algoSelect.value = smartAlgorithm ? "true" : "false";
+    }
 
     // Reset and start
     tasks = [];
@@ -461,6 +501,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     isRunning = true;
     fitCanvas(); // Force redraw
+    updateAlgoDisplay();
     log(`Benchmark started: ${benchmarkTargetTasks} tasks (${smartAlgorithm ? "LRT" : "SQ"})`, "#f9826c");
   };
 
@@ -476,6 +517,36 @@ document.addEventListener("DOMContentLoaded", () => {
     BASE_PROC_TIME = parseInt(procRange.value);
     procValue.textContent = BASE_PROC_TIME;
   };
+
+  // Benchmark modal slider updates
+  if (benchSpawnRange) {
+    benchSpawnRange.oninput = () => {
+      benchSpawnValue.textContent = benchSpawnRange.value;
+    };
+  }
+
+  if (benchProcRange) {
+    benchProcRange.oninput = () => {
+      benchProcValue.textContent = benchProcRange.value;
+    };
+  }
+
+  // Sidebar algorithm selector behavior
+  if (algoSelect) {
+    // initialize
+    algoSelect.value = smartAlgorithm ? "true" : "false";
+    algoSelect.disabled = false;
+    algoSelect.onchange = () => {
+      if (currentMode !== "sandbox") {
+        algoSelect.value = smartAlgorithm ? "true" : "false";
+        log("Algorithm can only be changed in Sandbox mode", "#f9826c");
+        return;
+      }
+      smartAlgorithm = algoSelect.value === "true";
+      updateAlgoDisplay();
+      log(`Algorithm set to ${smartAlgorithm ? "LRT" : "SQ"}`, "#58a6ff");
+    };
+  }
 
   // Finish benchmark and auto-export CSV
   function finishBenchmark() {
@@ -497,6 +568,12 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     log(`Benchmark finished – CSV generated: ${filename}`, "#3fb950");
+    // Re-enable sidebar sliders after benchmark completes
+    spawnRange.disabled = procRange.disabled = false;
+    if (algoSelect) {
+      algoSelect.disabled = false;
+      algoSelect.value = smartAlgorithm ? "true" : "false";
+    }
   }
 
   // Generate CSV content
