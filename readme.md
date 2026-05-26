@@ -15,9 +15,11 @@ This tool was made for visually understanding scheduling and balancing in distri
 - **Real-Time Visualization**: See tasks arriving, queuing, and processing on servers with different speeds.
 - **Comparable Algorithms**: Compare between LRT (based on expected delay) and SQ (shortest queue, with tie-break by speed).
 - **Modes**:
-  - **Sandbox**: Test with sliders for arrival interval, processing time and algorithm which can be altered in real time.
-  - **Benchmark**: Fixed parameters, choose the number of tasks (The options are 50, 100 and 200); runs until completion and generates .csv file (TaskID, WaitTime, Server, etc.).
+  - **Sandbox**: Test with sliders for request rate, base service time and algorithm which can be altered in real time.
+  - **Benchmark**: Fixed workload and server specs, choose the number of tasks (The options are 50, 100 and 200); runs until completion and generates .csv file (TaskID, WaitTime, Server, etc.).
 - **Metrics**: Avg Wait Time (s), Throughput (tasks/min), Avg CPU (%), Cluster Load (%).
+- **Customizable Server Specs**: Pick reference server models or tune CPU cores, GHz, RAM, disk IOPS, network bandwidth, and base latency per server.
+- **Realistic Workload Mixes**: Simulate Mixed Use, Web/API Heavy, Database Heavy, VM Heavy, and Storage Heavy traffic profiles.
 - **Logs and Export**: Automatic CSV export in benchmark for analysis (e.g., in Excel or Python).
 
 ## How to Run

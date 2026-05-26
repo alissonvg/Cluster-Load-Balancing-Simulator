@@ -31,7 +31,7 @@
 
     <!-- BENCHMARK CONFIG MODAL -->
     <div id="benchmarkConfig" class="menu-overlay" style="display:none;">
-        <div class="menu-box">
+        <div class="menu-box benchmark-box">
             <h1><i class="fas fa-cogs"></i> Benchmark Configuration</h1>
             <p style="margin: 15px 0; font-size: 15px;">Set fixed parameters</p>
 
@@ -48,13 +48,69 @@
                 <option value="false">Shortest Queue (SQ)</option>
             </select>
 
-            <label>Arrival Interval (frames)</label>
-            <input id="benchSpawnRange" type="range" min="20" max="300" value="120">
-            <span class="range-value" id="benchSpawnValue">120</span>
+            <label>Workload Mix</label>
+            <select id="benchmarkWorkloadSelect" style="width:100%; padding:10px; margin:8px 0 16px;">
+                <option value="mixed" selected>Mixed Use</option>
+                <option value="webHeavy">Web/API Heavy</option>
+                <option value="databaseHeavy">Database Heavy</option>
+                <option value="vmHeavy">VM Heavy</option>
+                <option value="storageHeavy">Storage Heavy</option>
+            </select>
 
-            <label>Base Processing Time (frames)</label>
-            <input id="benchProcRange" type="range" min="30" max="400" value="180">
-            <span class="range-value" id="benchProcValue">180</span>
+            <label>Request Rate (req/min)</label>
+            <input id="benchSpawnRange" type="range" min="5" max="300" step="5" value="30">
+            <span class="range-value" id="benchSpawnValue">30 req/min</span>
+
+            <label>Base Service Time (ms)</label>
+            <input id="benchProcRange" type="range" min="100" max="5000" step="100" value="900">
+            <span class="range-value" id="benchProcValue">900 ms</span>
+
+            <div class="benchmark-specs">
+                <h3><i class="fas fa-server"></i> Server Specs</h3>
+
+                <label>Server</label>
+                <select id="benchServerSelect">
+                    <option value="0">Server 01</option>
+                    <option value="1">Server 02</option>
+                    <option value="2">Server 03</option>
+                    <option value="3">Server 04</option>
+                </select>
+
+                <label>Reference model</label>
+                <select id="benchServerPresetSelect">
+                    <option value="small">Small general</option>
+                    <option value="medium">Medium general</option>
+                    <option value="compute">Compute optimized</option>
+                    <option value="memory">Memory optimized</option>
+                    <option value="io">I/O optimized</option>
+                    <option value="custom">Custom specs</option>
+                </select>
+
+                <div class="spec-grid">
+                    <label>CPU cores
+                        <input id="benchSpecCpuCores" type="number" min="1" max="128" step="1">
+                    </label>
+                    <label>GHz/core
+                        <input id="benchSpecCpuGhz" type="number" min="0.5" max="6" step="0.1">
+                    </label>
+                    <label>RAM GB
+                        <input id="benchSpecRamGb" type="number" min="1" max="1024" step="1">
+                    </label>
+                    <label>Disk IOPS
+                        <input id="benchSpecDiskIops" type="number" min="100" max="1000000" step="100">
+                    </label>
+                    <label>Network Mbps
+                        <input id="benchSpecNetworkMbps" type="number" min="10" max="200000" step="10">
+                    </label>
+                    <label>Base latency ms
+                        <input id="benchSpecLatencyMs" type="number" min="0" max="1000" step="1">
+                    </label>
+                </div>
+
+                <button id="applyBenchServerSpecsBtn" type="button">
+                    <i class="fas fa-check"></i> Apply to Selected Server
+                </button>
+            </div>
 
             <button id="startBenchmarkBtn" style="margin-top:20px; background:#3fb950; width:100%; padding:12px; font-size:16px; border:none; border-radius:6px; cursor:pointer;">
                 <i class="fas fa-play"></i> Start Benchmark
@@ -70,8 +126,8 @@
 
     <!-- SIDEBAR -->
     <div class="sidebar">
-        <div class="card">
-            <h3><i class="fas fa-tachometer-alt"></i> Simulation Overview</h3>
+        <details class="card" open>
+            <summary><i class="fas fa-tachometer-alt"></i> Simulation Overview</summary>
             <div class="metric">
                 <span class="label"><i class="fas fa-clock"></i> Pending Tasks</span>
                 <span id="pendingJobs" class="value">0</span>
@@ -99,17 +155,17 @@
                 <span class="label"><i class="fas fa-tachometer-alt"></i> Throughput</span>
                 <span id="throughput" class="value">0.0 tasks/min</span>
             </div>
-        </div>
+        </details>
 
-        <div class="card">
-            <h3><i class="fas fa-cogs"></i> Simulation Parameters</h3>
-            <label><i class="fas fa-stopwatch"></i> Arrival Interval (frames)</label>
-            <input id="spawnRange" type="range" min="20" max="300" value="120">
-            <span class="range-value" id="spawnValue">120</span>
+        <details class="card controls-card sandbox-sidebar" open>
+            <summary><i class="fas fa-cogs"></i> Simulation Parameters</summary>
+            <label><i class="fas fa-stopwatch"></i> Request Rate (req/min)</label>
+            <input id="spawnRange" type="range" min="5" max="300" step="5" value="30">
+            <span class="range-value" id="spawnValue">30 req/min</span>
 
-            <label><i class="fas fa-tasks"></i> Base Processing Time (frames)</label>
-            <input id="procRange" type="range" min="30" max="400" value="180">
-            <span class="range-value" id="procValue">180</span>
+            <label><i class="fas fa-tasks"></i> Base Service Time (ms)</label>
+            <input id="procRange" type="range" min="100" max="5000" step="100" value="900">
+            <span class="range-value" id="procValue">900 ms</span>
 
             <label><i class="fas fa-code-branch"></i> Algorithm</label>
             <select id="algoSelect" style="width:100%; padding:10px; margin:8px 0 16px;">
@@ -117,21 +173,85 @@
                 <option value="false">Shortest Queue (SQ)</option>
             </select>
 
-            <button id="toggleGrid"><i class="fas fa-th"></i> Toggle Grid</button>
-            <button id="pauseBtn"><i class="fas fa-pause"></i> Pause / Resume</button>
-            <button id="resetBtn"><i class="fas fa-redo"></i> Reset Simulation</button>
-            <button id="exportBtn"><i class="fas fa-download"></i> Export Results</button>
+            <label><i class="fas fa-briefcase"></i> Workload Mix</label>
+            <select id="workloadSelect">
+                <option value="mixed" selected>Mixed Use</option>
+                <option value="webHeavy">Web/API Heavy</option>
+                <option value="databaseHeavy">Database Heavy</option>
+                <option value="vmHeavy">VM Heavy</option>
+                <option value="storageHeavy">Storage Heavy</option>
+            </select>
+
+            <div class="action-grid">
+                <button id="toggleGrid"><i class="fas fa-th"></i> Grid</button>
+                <button id="pauseBtn"><i class="fas fa-pause"></i> Pause</button>
+                <button id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+                <button id="exportBtn"><i class="fas fa-download"></i> Export</button>
+            </div>
+        </details>
+
+        <details class="card specs-card sandbox-sidebar" open>
+            <summary><i class="fas fa-server"></i> Server Specs</summary>
+
+            <label><i class="fas fa-layer-group"></i> Server</label>
+            <select id="serverSelect">
+                <option value="0">Server 01</option>
+                <option value="1">Server 02</option>
+                <option value="2">Server 03</option>
+                <option value="3">Server 04</option>
+            </select>
+
+            <label><i class="fas fa-bookmark"></i> Reference model</label>
+            <select id="serverPresetSelect">
+                <option value="small">Small general</option>
+                <option value="medium">Medium general</option>
+                <option value="compute">Compute optimized</option>
+                <option value="memory">Memory optimized</option>
+                <option value="io">I/O optimized</option>
+                <option value="custom">Custom specs</option>
+            </select>
+
+            <div class="spec-grid">
+                <label>CPU cores
+                    <input id="specCpuCores" type="number" min="1" max="128" step="1">
+                </label>
+                <label>GHz/core
+                    <input id="specCpuGhz" type="number" min="0.5" max="6" step="0.1">
+                </label>
+                <label>RAM GB
+                    <input id="specRamGb" type="number" min="1" max="1024" step="1">
+                </label>
+                <label>Disk IOPS
+                    <input id="specDiskIops" type="number" min="100" max="1000000" step="100">
+                </label>
+                <label>Network Mbps
+                    <input id="specNetworkMbps" type="number" min="10" max="200000" step="10">
+                </label>
+                <label>Base latency ms
+                    <input id="specLatencyMs" type="number" min="0" max="1000" step="1">
+                </label>
+            </div>
+
+            <button id="applyServerSpecsBtn"><i class="fas fa-check"></i> Apply Server Specs</button>
+        </details>
+
+        <details class="card compact-card" open>
+            <summary><i class="fas fa-chart-bar"></i> Benchmark Results</summary>
+            <div id="benchmarkResults" class="results-box"></div>
+        </details>
+
+        <div class="card benchmark-sidebar" hidden>
+            <h3><i class="fas fa-chart-line"></i> Benchmark Controls</h3>
+            <div class="action-grid">
+                <button id="benchmarkResetBtn"><i class="fas fa-redo"></i> Reset</button>
+                <button id="benchmarkExportBtn"><i class="fas fa-download"></i> Export</button>
+            </div>
         </div>
 
-        <div class="card">
-            <h3><i class="fas fa-chart-bar"></i> Benchmark Results</h3>
-            <div id="benchmarkResults" style="font-size:13px; color:#8b949e; min-height:100px;"></div>
-        </div>
-
-        <div class="card log-card">
-            <h3><i class="fas fa-terminal"></i> Simulation Log (last 15)</h3>
+        <details class="card log-card">
+            <summary><i class="fas fa-terminal"></i> Simulation Log</summary>
             <div id="logBody" class="log-box"></div>
-        </div>
+        </details>
     </div>
 
     <!-- CANVAS -->
