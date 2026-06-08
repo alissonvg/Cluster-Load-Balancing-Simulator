@@ -70,7 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const FRAME_MS = 50; // Milliseconds per frame update
 
   // State variables
-  let smartAlgorithm = true; // true: Least Remaining Time, false: Shortest Queue
+  let currentAlgorithm = "lrt";
+  let roundRobinIndex = 0;
+  let weightedRoundRobinSequence = [];
+  let weightedRoundRobinIndex = 0;
   let isRunning = false; // Controls if simulation is updating
   let simulatedSeconds = 0; // Total simulated time in seconds
   let spawnCounter = 0; // Counter for next task spawn
@@ -198,6 +201,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const ALGORITHMS = {
+    lrt: {
+      label: "Least Remaining Time",
+      shortLabel: "LRT"
+    },
+    sq: {
+      label: "Shortest Queue",
+      shortLabel: "SQ"
+    },
+    rr: {
+      label: "Round Robin",
+      shortLabel: "RR"
+    },
+    wrr: {
+      label: "Weighted Round Robin",
+      shortLabel: "WRR"
+    },
+    lc: {
+      label: "Least Connections",
+      shortLabel: "LC"
+    },
+    p2c: {
+      label: "Power of Two Choices",
+      shortLabel: "P2C"
+    }
+  };
+
   // Server definitions (heterogeneous, spec-driven capacity)
   const SERVERS = [
     createServer("Server 01", 120, "small"),
@@ -205,6 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
     createServer("Server 03", 360, "compute"),
     createServer("Server 04", 480, "memory")
   ];
+  rebuildWeightedRoundRobinSequence();
 
   let tasks = []; // Array of active tasks
   let completedTasks = 0; // Count of completed tasks
@@ -246,6 +277,26 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateServerCapacity(server) {
     server.speed = calculateServerSpeed(server.specs);
     server.type = server.specs.type || "custom";
+    rebuildWeightedRoundRobinSequence();
+  }
+
+  function getServerWeight(server) {
+    return Math.max(1, Math.round(server.speed));
+  }
+
+  function rebuildWeightedRoundRobinSequence() {
+    if (typeof SERVERS === "undefined") return;
+    weightedRoundRobinSequence = [];
+    SERVERS.forEach((server, index) => {
+      const weight = getServerWeight(server);
+      for (let i = 0; i < weight; i++) {
+        weightedRoundRobinSequence.push(index);
+      }
+    });
+    if (weightedRoundRobinSequence.length === 0) {
+      weightedRoundRobinSequence = SERVERS.map((_, index) => index);
+    }
+    weightedRoundRobinIndex = weightedRoundRobinIndex % weightedRoundRobinSequence.length;
   }
 
   function getServerCpu(server) {
@@ -265,6 +316,8 @@ document.addEventListener("DOMContentLoaded", () => {
     totalWaitMs = 0;
     simulatedSeconds = 0;
     spawnCounter = 0;
+    roundRobinIndex = 0;
+    weightedRoundRobinIndex = 0;
     benchmarkTaskData = [];
     benchmarkResultsEl.innerHTML = "";
     updateMetrics();
@@ -403,21 +456,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Choose best server based on current algorithm
   function chooseBestServer() {
-    if (smartAlgorithm) {
-      return SERVERS.reduce((best, curr) => getExpectedDelay(curr) < getExpectedDelay(best) ? curr : best);
-    } else {
-      return SERVERS.reduce((best, curr) => {
-        const qDiff = curr.queue.length - best.queue.length;
-        if (qDiff < 0) return curr;
-        if (qDiff > 0) return best;
-        return getProcessTime(curr) < getProcessTime(best) ? curr : best;
-      });
+    switch (currentAlgorithm) {
+      case "sq":
+        return SERVERS.reduce((best, curr) => {
+          const qDiff = curr.queue.length - best.queue.length;
+          if (qDiff < 0) return curr;
+          if (qDiff > 0) return best;
+          return getProcessTime(curr) < getProcessTime(best) ? curr : best;
+        });
+      case "rr": {
+        const server = SERVERS[roundRobinIndex % SERVERS.length];
+        roundRobinIndex = (roundRobinIndex + 1) % SERVERS.length;
+        return server;
+      }
+      case "wrr": {
+        const serverIndex = weightedRoundRobinSequence[weightedRoundRobinIndex % weightedRoundRobinSequence.length];
+        weightedRoundRobinIndex = (weightedRoundRobinIndex + 1) % weightedRoundRobinSequence.length;
+        return SERVERS[serverIndex];
+      }
+      case "lc":
+        return SERVERS.reduce((best, curr) => {
+          const activeDiff = curr.queue.length - best.queue.length;
+          if (activeDiff < 0) return curr;
+          if (activeDiff > 0) return best;
+          return getExpectedDelay(curr) < getExpectedDelay(best) ? curr : best;
+        });
+      case "p2c": {
+        const firstIndex = Math.floor(Math.random() * SERVERS.length);
+        let secondIndex = Math.floor(Math.random() * SERVERS.length);
+        if (SERVERS.length > 1) {
+          while (secondIndex === firstIndex) {
+            secondIndex = Math.floor(Math.random() * SERVERS.length);
+          }
+        }
+        const first = SERVERS[firstIndex];
+        const second = SERVERS[secondIndex];
+        return getExpectedDelay(first) <= getExpectedDelay(second) ? first : second;
+      }
+      case "lrt":
+      default:
+        return SERVERS.reduce((best, curr) => getExpectedDelay(curr) < getExpectedDelay(best) ? curr : best);
     }
+  }
+
+  function getAlgorithmShortLabel() {
+    return ALGORITHMS[currentAlgorithm]?.shortLabel || currentAlgorithm.toUpperCase();
+  }
+
+  function getAlgorithmLabel() {
+    return ALGORITHMS[currentAlgorithm]?.label || currentAlgorithm;
+  }
+
+  function getAlgorithmExportLabel() {
+    return getAlgorithmShortLabel();
+  }
+
+  function syncAlgorithmControls() {
+    if (algoSelect) algoSelect.value = currentAlgorithm;
+    const benchmarkAlgoSelect = document.getElementById("benchmarkAlgoSelect");
+    if (benchmarkAlgoSelect) benchmarkAlgoSelect.value = currentAlgorithm;
+  }
+
+  function legacyAlgorithmValueToKey(value) {
+    if (value === "true") return "lrt";
+    if (value === "false") return "sq";
+    return value;
   }
 
   // Update algorithm display in UI
   function updateAlgoDisplay() {
-    const name = smartAlgorithm ? "Least Remaining Time" : "Shortest Queue";
+    const name = getAlgorithmLabel();
     if (algoNameEl) algoNameEl.textContent = name;
     if (currentAlgoEl) currentAlgoEl.textContent = name;
   }
@@ -484,7 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
     assignTarget() {
       this.target = chooseBestServer();
       this.target.queue.push(this);
-      log(`Task arrived → assigned to ${this.target.name} (${smartAlgorithm ? "LRT" : "SQ"})`);
+      log(`Task arrived → assigned to ${this.target.name} (${getAlgorithmShortLabel()})`);
     }
 
     // Update task position and state
@@ -731,9 +839,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setBenchmarkSidebar(false);
     log("Simulation reset");
     // Re-enable sidebar sliders in case they were locked by benchmark
-    if (algoSelect) {
-      algoSelect.value = smartAlgorithm ? "true" : "false";
-    }
+    syncAlgorithmControls();
   }
 
   resetBtn.onclick = resetSimulation;
@@ -753,7 +859,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const csv = generateBenchmarkCSV();
     const today = new Date().toISOString().slice(0, 10);
-    const algo = smartAlgorithm ? "LRT" : "SQ";
+    const algo = getAlgorithmExportLabel();
     const filename = `benchmark_${completedTasks}_tasks_${algo}_${today}.csv`;
     downloadCSV(csv, filename);
     log(`Results exported: ${filename}`);
@@ -769,10 +875,8 @@ document.addEventListener("DOMContentLoaded", () => {
     isRunning = true;
     setBenchmarkLocked(false);
     setBenchmarkSidebar(false);
-    if (algoSelect) {
-      algoSelect.value = smartAlgorithm ? "true" : "false";
-      updateAlgoDisplay();
-    }
+    syncAlgorithmControls();
+    updateAlgoDisplay();
     fitCanvas(); // Force redraw after overlay hide
     log("Sandbox Mode started – adjust request rate and service time", "#58a6ff");
   };
@@ -789,6 +893,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (benchmarkWorkloadSelect) {
       benchmarkWorkloadSelect.value = currentWorkloadMix;
     }
+    syncAlgorithmControls();
     if (benchServerSelect && benchServerPresetSelect) {
       benchServerSelect.value = "0";
       populateSpecForm(SERVERS[0], benchmarkSpecControls);
@@ -804,7 +909,7 @@ document.addEventListener("DOMContentLoaded", () => {
     benchmarkConfig.style.display = "none";
     currentMode = "benchmark";
     benchmarkTargetTasks = parseInt(document.getElementById("numTasksSelect").value);
-    smartAlgorithm = document.getElementById("benchmarkAlgoSelect").value === "true";
+    currentAlgorithm = legacyAlgorithmValueToKey(document.getElementById("benchmarkAlgoSelect").value);
     currentWorkloadMix = benchmarkWorkloadSelect.value;
 
     // Apply chosen benchmark parameters (arrival / processing) and lock controls
@@ -819,7 +924,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateWorkloadControlLabels();
     setBenchmarkLocked(true);
     setBenchmarkSidebar(true);
-    if (algoSelect) algoSelect.value = smartAlgorithm ? "true" : "false";
+    syncAlgorithmControls();
     if (workloadSelect) workloadSelect.value = currentWorkloadMix;
 
     // Reset and start
@@ -828,7 +933,7 @@ document.addEventListener("DOMContentLoaded", () => {
     isRunning = true;
     fitCanvas(); // Force redraw
     updateAlgoDisplay();
-    log(`Benchmark started: ${benchmarkTargetTasks} tasks, ${WORKLOAD_MIXES[currentWorkloadMix].label}, ${formatRequestRate(REQUEST_RATE_PER_MIN)}, base ${formatServiceTime(BASE_SERVICE_TIME_MS)} (${smartAlgorithm ? "LRT" : "SQ"})`, "#f9826c");
+    log(`Benchmark started: ${benchmarkTargetTasks} tasks, ${WORKLOAD_MIXES[currentWorkloadMix].label}, ${formatRequestRate(REQUEST_RATE_PER_MIN)}, base ${formatServiceTime(BASE_SERVICE_TIME_MS)} (${getAlgorithmShortLabel()})`, "#f9826c");
   };
 
   // Parameter sliders (active only in sandbox)
@@ -860,17 +965,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Sidebar algorithm selector behavior
   if (algoSelect) {
     // initialize
-    algoSelect.value = smartAlgorithm ? "true" : "false";
+    algoSelect.value = currentAlgorithm;
     algoSelect.disabled = false;
     algoSelect.onchange = () => {
       if (currentMode !== "sandbox") {
-        algoSelect.value = smartAlgorithm ? "true" : "false";
+        algoSelect.value = currentAlgorithm;
         log("Algorithm can only be changed in Sandbox mode", "#f9826c");
         return;
       }
-      smartAlgorithm = algoSelect.value === "true";
+      currentAlgorithm = legacyAlgorithmValueToKey(algoSelect.value);
+      syncAlgorithmControls();
       updateAlgoDisplay();
-      log(`Algorithm set to ${smartAlgorithm ? "LRT" : "SQ"}`, "#58a6ff");
+      log(`Algorithm set to ${getAlgorithmLabel()} (${getAlgorithmShortLabel()})`, "#58a6ff");
     };
   }
 
@@ -1037,7 +1143,7 @@ document.addEventListener("DOMContentLoaded", () => {
     isRunning = false;
 
     const today = new Date().toISOString().slice(0, 10);
-    const algo = smartAlgorithm ? "LRT" : "SQ";
+    const algo = getAlgorithmExportLabel();
     const filename = `benchmark_${benchmarkTargetTasks}_tasks_${algo}_${today}.csv`;
 
     const csv = generateBenchmarkCSV();
@@ -1057,16 +1163,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Re-enable sidebar sliders after benchmark completes
     setBenchmarkLocked(false);
     setBenchmarkSidebar(false);
-    if (algoSelect) {
-      algoSelect.value = smartAlgorithm ? "true" : "false";
-    }
+    syncAlgorithmControls();
   }
 
   // Generate CSV content
   function generateBenchmarkCSV() {
     let csv = "TaskID,Algorithm,WorkloadMix,RequestRate_per_min,BaseServiceTime_ms,ArrivalFrame,WaitTime_ms,TaskType,Server,ServerModel\n";
     benchmarkTaskData.forEach((t, i) => {
-      csv += `${i+1},${smartAlgorithm ? "LRT" : "SQ"},${t.workloadMix},${t.requestRate},${t.baseServiceTime},${t.arrival},${t.wait},${t.taskType},${t.server},${t.serverModel}\n`;
+      csv += `${i+1},${getAlgorithmExportLabel()},${t.workloadMix},${t.requestRate},${t.baseServiceTime},${t.arrival},${t.wait},${t.taskType},${t.server},${t.serverModel}\n`;
     });
     return csv;
   }
